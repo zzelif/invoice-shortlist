@@ -46,21 +46,48 @@ export default async function Home() {
         <TableBody>
           {results.map((result) => {
             return (
-              <TableRow>
-                <TableCell className="p-4 font-medium text-left">
-                  <span className="font-semibold">INV001</span>
+              <TableRow key={result.id}>
+                <TableCell className="p-0">
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="font-semibold block p-4 text-left"
+                  >
+                    {result.invoiceNumber}
+                  </Link>
                 </TableCell>
-                <TableCell className="p-4 text-left">
-                  <span className="font-semibold">Dan</span>
+                <TableCell className="p-0">
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="font-semibold block p-4 text-left"
+                  >
+                    {result.client}
+                  </Link>
                 </TableCell>
-                <TableCell className="p-4 text-left">
-                  <span className="">03/02/2026</span>
+                <TableCell className="p-0">
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="block p-4 text-left"
+                  >
+                    {new Date(result.dueDate).toLocaleDateString()}
+                  </Link>
                 </TableCell>
-                <TableCell className="p-4 text-left">
-                  <span className="font-semibold">$250.00</span>
+                <TableCell className="p-0">
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="font-semibold block p-4 text-left"
+                  >
+                    ${result.total}
+                  </Link>
                 </TableCell>
-                <TableCell className="p-4 text-right">
-                  <Badge className="rounded-full">Paid</Badge>
+                <TableCell className="">
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="block p-4 text-right"
+                  >
+                    <Badge className="rounded-full font-semibold">
+                      {result.status}
+                    </Badge>
+                  </Link>
                 </TableCell>
               </TableRow>
             );
