@@ -3,6 +3,8 @@
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 //
 
 export async function createAction(formData: FormData) {
@@ -30,4 +32,11 @@ export async function createAction(formData: FormData) {
     });
 
   redirect(`/dashboard`); // Redirect to the newly created invoice
+}
+
+export async function updateInvoiceStatus(formData: FormData) {
+  const id = parseInt(formData.get("id") as string);
+  const status = formData.get("status") as "open" | "paid" | "unpaid" | "void";
+
+  await db.update(Invoices).set({ status }).where(eq(Invoices.id, id));
 }

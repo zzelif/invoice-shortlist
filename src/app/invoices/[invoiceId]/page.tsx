@@ -1,24 +1,13 @@
+import { notFound } from "next/navigation";
+
 import { eq } from "drizzle-orm";
+import { cn } from "@/lib/utils";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 type Props = {
   params: { invoiceId: string };
@@ -27,6 +16,10 @@ type Props = {
 export default async function InvoicePage(props: Props) {
   const invoiceId = parseInt(props.params.invoiceId);
 
+  if (isNaN(invoiceId)) {
+    throw new Error("Invalid invoice ID");
+  }
+
   const [result] = await db
     .select()
     .from(Invoices)
@@ -34,7 +27,7 @@ export default async function InvoicePage(props: Props) {
     .limit(1);
 
   if (!result) {
-    return <div className="text-center mt-12 text-xl">Invoice not found</div>;
+    notFound();
   }
 
   const items = JSON.parse(result.items) as {
@@ -45,24 +38,21 @@ export default async function InvoicePage(props: Props) {
 
   return (
     <main className="flex flex-col justify-center h-full text-center gap-10 max-w-5xl mx-auto my-12">
-      <div className="flex justify-center gap-10">
-        <h1 className="text-3xl font-semibold">
+      <div className="flex justify-center">
+        <h1 className="flex items-center gap-4 text-3xl font-semibold">
           Invoice #{result.invoiceNumber}
+          <Badge
+            className={cn(
+              "rounded-full capitalize",
+              result.status === "open" && "bg-blue-500",
+              result.status === "paid" && "bg-green-600",
+              result.status === "unpaid" && "bg-zinc-700",
+              result.status === "void" && "bg-red-600"
+            )}
+          >
+            {result.status}
+          </Badge>
         </h1>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">{result.status}</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-28" align="center">
-            <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem>Open</DropdownMenuItem>
-              <DropdownMenuItem>Paid</DropdownMenuItem>
-              <DropdownMenuItem>Unpaid</DropdownMenuItem>
-              <DropdownMenuItem>Void</DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       <div className="grid gap-4 max-w-xl place-self-center text-left">

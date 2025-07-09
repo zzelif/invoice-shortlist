@@ -1,4 +1,5 @@
 import { CirclePlus } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 
@@ -84,7 +85,15 @@ export default async function Home() {
                     href={`/invoices/${result.id}`}
                     className="block p-4 text-right"
                   >
-                    <Badge className="rounded-full font-semibold">
+                    <Badge
+                      className={cn(
+                        "rounded-full",
+                        result.status === "open" && "bg-blue-500",
+                        result.status === "paid" && "bg-green-600",
+                        result.status === "unpaid" && "bg-zinc-700",
+                        result.status === "void" && "bg-red-600"
+                      )}
+                    >
                       {result.status}
                     </Badge>
                   </Link>

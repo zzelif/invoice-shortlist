@@ -55,16 +55,6 @@ export default function InvoiceForm() {
       alert("Please fill all required fields.");
       return;
     }
-
-    // Submit logic here (e.g. call Server Action or API)
-    console.log({
-      invoiceNumber,
-      issueDate,
-      dueDate,
-      client,
-      items,
-      total,
-    });
   };
 
   return (
