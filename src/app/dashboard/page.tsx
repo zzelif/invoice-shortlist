@@ -1,7 +1,8 @@
-import { CirclePlus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { type Metadata } from "next";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
+import { AVAILABLE_STATUSES } from "@/data/invoices";
 
 import {
   Table,
@@ -13,96 +14,142 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { CirclePlus } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import Container from "@/components/container";
 
-export default async function Home() {
-  const results = await db.select().from(Invoices);
-  console.log("Invoices:", results);
+type Props = {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
+export default async function DashboardPage({ searchParams }: Props) {
+  console.log("Server searchParams.status", searchParams.status);
+  const selectedStatus = searchParams.status?.toString();
+  const filtered = selectedStatus
+    ? await db
+        .select()
+        .from(Invoices)
+        .where(eq(Invoices.status, selectedStatus as any))
+    : await db.select().from(Invoices);
+  console.log("Selected Status:", selectedStatus);
+  console.log("Filtered Invoices:", filtered);
   return (
-    <main className="flex flex-col justify-center h-full text-center gap-6 max-w-5xl mx-auto my-12">
-      <div className="flex justify-between">
-        <h1 className="text-3xl font-semibold">Invoices</h1>
-        <p>
-          <Button className="inline-flex gap-2" variant="ghost" asChild>
-            <Link href="/invoices/new">
-              <CirclePlus className="h-4 w-4" />
-              Create New Invoice
-            </Link>
-          </Button>
-        </p>
-      </div>
-      <Table>
-        <TableCaption>A list of your recent invoices.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px] p-4">Invoice #</TableHead>
-            <TableHead className="p-4">Client Name</TableHead>
-            <TableHead className="p-4">Due Date</TableHead>
-            <TableHead className="p-4">Amount</TableHead>
-            <TableHead className="text-right p-4">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {results.map((result) => {
-            return (
-              <TableRow key={result.id}>
+    <main className="h-full">
+      <Container>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-semibold">Invoices</h1>
+
+          <div className="flex gap-4">
+            {/* 🔽 Dropdown Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="capitalize">
+                  {selectedStatus
+                    ? AVAILABLE_STATUSES.find((s) => s.id === selectedStatus)
+                        ?.label ?? selectedStatus
+                    : "All Statuses"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">All</Link>
+                </DropdownMenuItem>
+                {AVAILABLE_STATUSES.map((status) => (
+                  <DropdownMenuItem key={status.id} asChild>
+                    <Link href={`/dashboard?status=${status.id}`}>
+                      {status.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button asChild variant="ghost" className="inline-flex gap-2">
+              <Link href="/invoices/new">
+                <CirclePlus className="h-4 w-4" />
+                Create New Invoice
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        <Table>
+          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px] p-4">Invoice #</TableHead>
+              <TableHead className="p-4">Client Name</TableHead>
+              <TableHead className="p-4">Due Date</TableHead>
+              <TableHead className="p-4">Amount</TableHead>
+              <TableHead className="text-right p-4">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((invoice) => (
+              <TableRow key={invoice.id}>
                 <TableCell className="p-0">
                   <Link
-                    href={`/invoices/${result.id}`}
+                    href={`/invoices/${invoice.id}`}
                     className="font-semibold block p-4 text-left"
                   >
-                    {result.invoiceNumber}
+                    {invoice.invoiceNumber}
                   </Link>
                 </TableCell>
                 <TableCell className="p-0">
                   <Link
-                    href={`/invoices/${result.id}`}
+                    href={`/invoices/${invoice.id}`}
                     className="font-semibold block p-4 text-left"
                   >
-                    {result.client}
+                    {invoice.client}
                   </Link>
                 </TableCell>
                 <TableCell className="p-0">
                   <Link
-                    href={`/invoices/${result.id}`}
+                    href={`/invoices/${invoice.id}`}
                     className="block p-4 text-left"
                   >
-                    {new Date(result.dueDate).toLocaleDateString()}
+                    {new Date(invoice.dueDate).toLocaleDateString()}
                   </Link>
                 </TableCell>
                 <TableCell className="p-0">
                   <Link
-                    href={`/invoices/${result.id}`}
+                    href={`/invoices/${invoice.id}`}
                     className="font-semibold block p-4 text-left"
                   >
-                    ${result.total}
+                    ${invoice.total}
                   </Link>
                 </TableCell>
-                <TableCell className="">
+                <TableCell className="p-0">
                   <Link
-                    href={`/invoices/${result.id}`}
+                    href={`/invoices/${invoice.id}`}
                     className="block p-4 text-right"
                   >
                     <Badge
                       className={cn(
-                        "rounded-full",
-                        result.status === "open" && "bg-blue-500",
-                        result.status === "paid" && "bg-green-600",
-                        result.status === "unpaid" && "bg-zinc-700",
-                        result.status === "void" && "bg-red-600"
+                        "rounded-full capitalize",
+                        invoice.status === "open" && "bg-blue-500",
+                        invoice.status === "paid" && "bg-green-600",
+                        invoice.status === "unpaid" && "bg-zinc-700",
+                        invoice.status === "void" && "bg-red-600"
                       )}
                     >
-                      {result.status}
+                      {invoice.status}
                     </Badge>
                   </Link>
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </Container>
     </main>
   );
 }

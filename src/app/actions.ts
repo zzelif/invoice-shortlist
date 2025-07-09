@@ -4,7 +4,6 @@ import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 //
 
 export async function createAction(formData: FormData) {
@@ -30,6 +29,8 @@ export async function createAction(formData: FormData) {
     .returning({
       id: Invoices.id,
     });
+
+  console.log("Created Invoice:", results);
 
   redirect(`/dashboard`); // Redirect to the newly created invoice
 }

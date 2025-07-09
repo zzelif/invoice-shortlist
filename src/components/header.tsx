@@ -1,9 +1,25 @@
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import Container from "@/components/container";
+import Link from "next/link";
+
 const Header = () => {
   return (
-    <header>
-      <div className="flex items-center justify-between gap-4 font-bold text-black max-w-5xl mx-auto pt-5">
-        <p>Invoicify</p>
-      </div>
+    <header className="mt-8 mb-12">
+      <Container>
+        <div className="flex justify-between items-center gap-4">
+          <p className="font-bold text-black">
+            <Link href="/dashboard">Invoicify</Link>
+          </p>
+          <div>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </div>
+        </div>
+      </Container>
     </header>
   );
 };
