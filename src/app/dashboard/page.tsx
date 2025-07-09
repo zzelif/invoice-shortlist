@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { Invoices, InvoiceStatus } from "@/db/schema";
-import { AVAILABLE_STATUSES } from "@/data/invoices";
 
 import {
   Table,
@@ -14,16 +13,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import { CirclePlus } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Container from "@/components/container";
+import StatusFilter from "@/components/filter";
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -47,29 +41,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           <h1 className="text-3xl font-semibold">Invoices</h1>
 
           <div className="flex gap-4">
-            {/* 🔽 Dropdown Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="capitalize">
-                  {selectedStatus
-                    ? AVAILABLE_STATUSES.find((s) => s.id === selectedStatus)
-                        ?.label ?? selectedStatus
-                    : "All Statuses"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard">All</Link>
-                </DropdownMenuItem>
-                {AVAILABLE_STATUSES.map((status) => (
-                  <DropdownMenuItem key={status.id} asChild>
-                    <Link href={`/dashboard?status=${status.id}`}>
-                      {status.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <StatusFilter></StatusFilter>
 
             <Button asChild variant="ghost" className="inline-flex gap-2">
               <Link href="/invoices/new">
