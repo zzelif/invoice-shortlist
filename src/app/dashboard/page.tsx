@@ -41,7 +41,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           <h1 className="text-3xl font-semibold">Invoices</h1>
 
           <div className="flex gap-4">
-            <StatusFilter></StatusFilter>
+            <form action={updateInvoiceStatus}></form>
 
             <Button asChild variant="ghost" className="inline-flex gap-2">
               <Link href="/invoices/new">

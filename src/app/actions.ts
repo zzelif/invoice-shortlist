@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
+import { Invoices, InvoiceStatus } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 //
@@ -37,7 +37,11 @@ export async function createAction(formData: FormData) {
 
 export async function updateInvoiceStatus(formData: FormData) {
   const id = parseInt(formData.get("id") as string);
-  const status = formData.get("status") as "open" | "paid" | "unpaid" | "void";
+  const status = formData.get("status") as InvoiceStatus;
+
+  if (!id || !status) throw new Error("Missing required data");
 
   await db.update(Invoices).set({ status }).where(eq(Invoices.id, id));
+
+  redirect(`/invoices/${id}`);
 }

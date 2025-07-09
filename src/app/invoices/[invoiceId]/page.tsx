@@ -7,7 +7,8 @@ import { Invoices } from "@/db/schema";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
+import InvoiceStatusForm from "@/components/invoice-status";
 
 type Props = {
   params: { invoiceId: string };
@@ -41,7 +42,7 @@ export default async function InvoicePage(props: Props) {
       <div className="flex justify-center">
         <h1 className="flex items-center gap-4 text-3xl font-semibold">
           Invoice #{result.invoiceNumber}
-          <Badge
+          {/* <Badge
             className={cn(
               "rounded-full capitalize",
               result.status === "open" && "bg-blue-500",
@@ -51,7 +52,11 @@ export default async function InvoicePage(props: Props) {
             )}
           >
             {result.status}
-          </Badge>
+          </Badge> */}
+          <InvoiceStatusForm
+            invoiceId={result.id}
+            currentStatus={result.status}
+          />
         </h1>
       </div>
 
