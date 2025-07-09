@@ -1,6 +1,7 @@
 import { CirclePlus } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { db } from "@/db";
+import { Invoices } from "@/db/schema";
+
 import {
   Table,
   TableBody,
@@ -11,8 +12,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default async function Home() {
+  const results = await db.select().from(Invoices);
+  console.log("Invoices:", results);
+
   return (
     <main className="flex flex-col justify-center h-full text-center gap-6 max-w-5xl mx-auto my-12">
       <div className="flex justify-between">
@@ -38,23 +44,27 @@ export default function Home() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell className="p-4 font-medium text-left">
-              <span className="font-semibold">INV001</span>
-            </TableCell>
-            <TableCell className="p-4 text-left">
-              <span className="font-semibold">Dan</span>
-            </TableCell>
-            <TableCell className="p-4 text-left">
-              <span className="">03/02/2026</span>
-            </TableCell>
-            <TableCell className="p-4 text-left">
-              <span className="font-semibold">$250.00</span>
-            </TableCell>
-            <TableCell className="p-4 text-right">
-              <Badge className="rounded-full">Paid</Badge>
-            </TableCell>
-          </TableRow>
+          {results.map((result) => {
+            return (
+              <TableRow>
+                <TableCell className="p-4 font-medium text-left">
+                  <span className="font-semibold">INV001</span>
+                </TableCell>
+                <TableCell className="p-4 text-left">
+                  <span className="font-semibold">Dan</span>
+                </TableCell>
+                <TableCell className="p-4 text-left">
+                  <span className="">03/02/2026</span>
+                </TableCell>
+                <TableCell className="p-4 text-left">
+                  <span className="font-semibold">$250.00</span>
+                </TableCell>
+                <TableCell className="p-4 text-right">
+                  <Badge className="rounded-full">Paid</Badge>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </main>

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { type SyntheticEvent, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { v4 as uuidv4 } from "uuid"; // for generating invoice numbers
+import { v4 as uuidv4 } from "uuid";
+
+import { createAction } from "@/app/actions";
 
 type Item = {
   name: string;
@@ -47,9 +49,9 @@ export default function InvoiceForm() {
     setItems(newItems);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e: SyntheticEvent) => {
     if (!issueDate || !dueDate || !client) {
+      e.preventDefault();
       alert("Please fill all required fields.");
       return;
     }
@@ -72,6 +74,7 @@ export default function InvoiceForm() {
       </div>
 
       <form
+        action={createAction}
         onSubmit={handleSubmit}
         className="grid gap-4 max-w-xl place-self-center"
       >
@@ -116,6 +119,7 @@ export default function InvoiceForm() {
           <Input
             id="client"
             placeholder="Client Name"
+            name="client"
             required
             value={client}
             onChange={(e) => setClient(e.target.value)}
@@ -141,6 +145,7 @@ export default function InvoiceForm() {
                 <Input
                   id={`item-name-${index}`}
                   placeholder="Item Name"
+                  name={`item-name-${index}`}
                   value={item.name}
                   onChange={(e) =>
                     handleItemChange(index, "name", e.target.value)
@@ -206,6 +211,10 @@ export default function InvoiceForm() {
         <div className="text-right text-xl font-bold">
           Total: ${total.toFixed(2)}
         </div>
+
+        <input type="hidden" name="invoiceNumber" value={invoiceNumber} />
+        <input type="hidden" name="total" value={total.toFixed(2)} />
+        <input type="hidden" name="items" value={JSON.stringify(items)} />
 
         <Button type="submit">Submit Invoice</Button>
       </form>
