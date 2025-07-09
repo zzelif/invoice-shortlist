@@ -14,6 +14,8 @@ export const statusEnum = pgEnum("invoice_status", [
   "void",
 ]);
 
+export type InvoiceStatus = (typeof statusEnum.enumValues)[number];
+
 export const Invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
   invoiceNumber: text("invoice_number").notNull(),

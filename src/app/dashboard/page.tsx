@@ -1,7 +1,6 @@
-import { type Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
+import { Invoices, InvoiceStatus } from "@/db/schema";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 
 import {
@@ -37,7 +36,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     ? await db
         .select()
         .from(Invoices)
-        .where(eq(Invoices.status, selectedStatus as any))
+        .where(eq(Invoices.status, selectedStatus as InvoiceStatus))
     : await db.select().from(Invoices);
   console.log("Selected Status:", selectedStatus);
   console.log("Filtered Invoices:", filtered);
