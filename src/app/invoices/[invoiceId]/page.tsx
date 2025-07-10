@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import { eq } from "drizzle-orm";
-import { cn } from "@/lib/utils";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { Label } from "@/components/ui/label";
