@@ -17,14 +17,12 @@ export default function StatusFilter() {
   const current = searchParams.get("status") || "";
 
   const select = (status: string) => {
-    // clone and set / delete
     const params = new URLSearchParams(searchParams.toString());
     if (status) params.set("status", status);
     else params.delete("status");
 
     console.log("searchParams = ", pathname, params.toString());
 
-    // navigate to same path + new query
     router.push(pathname + "?" + params.toString());
   };
 

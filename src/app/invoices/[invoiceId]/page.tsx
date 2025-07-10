@@ -24,20 +24,18 @@ import {
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 import { updateInvoiceStatus } from "@/app/actions";
 
-type InvoicePageProps = {
-  params: {
-    invoiceId: string;
-  };
-};
-
-export default async function InvoicePage({ params }: InvoicePageProps) {
+export default async function InvoicePage({
+  params,
+}: {
+  params: Promise<{ invoiceId: string }>;
+}) {
   const { userId } = await auth();
 
   if (!userId) {
     return;
   }
 
-  const invoiceId = parseInt(params.invoiceId);
+  const invoiceId = await params;
 
   if (!invoiceId) {
     notFound();
@@ -46,7 +44,9 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   const [result] = await db
     .select()
     .from(Invoices)
-    .where(and(eq(Invoices.id, invoiceId), eq(Invoices.clientId, userId)))
+    .where(
+      and(eq(Invoices.id, Number(invoiceId)), eq(Invoices.clientId, userId))
+    )
     .limit(1);
 
   if (!result) {
