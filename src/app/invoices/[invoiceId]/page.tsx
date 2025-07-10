@@ -35,18 +35,17 @@ export default async function InvoicePage({
     return;
   }
 
-  const invoiceId = await params;
+  const { invoiceId } = await params;
 
-  if (!invoiceId) {
+  const parsedId = parseInt(invoiceId);
+
+  if (isNaN(parsedId)) {
     notFound();
   }
-
   const [result] = await db
     .select()
     .from(Invoices)
-    .where(
-      and(eq(Invoices.id, Number(invoiceId)), eq(Invoices.clientId, userId))
-    )
+    .where(and(eq(Invoices.id, parsedId), eq(Invoices.clientId, userId)))
     .limit(1);
 
   if (!result) {

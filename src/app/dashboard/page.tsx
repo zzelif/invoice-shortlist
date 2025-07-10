@@ -26,7 +26,7 @@ import StatusFilter from "@/components/filter";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) return null;
