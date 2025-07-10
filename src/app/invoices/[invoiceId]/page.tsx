@@ -27,7 +27,7 @@ import { updateInvoiceStatus } from "@/app/actions";
 export default async function InvoicePage({
   params,
 }: {
-  params: { invoiceId: string };
+  params: { invoiceId?: string };
 }) {
   const { userId } = await auth();
 
@@ -37,14 +37,16 @@ export default async function InvoicePage({
 
   const invoiceId = Number(params.invoiceId);
 
-  if (!Number.isInteger(invoiceId)) {
+  if (!invoiceId) {
     notFound();
   }
 
   const [result] = await db
     .select()
     .from(Invoices)
-    .where(and(eq(Invoices.id, invoiceId), eq(Invoices.clientId, userId)))
+    .where(
+      and(eq(Invoices.id, Number(invoiceId)), eq(Invoices.clientId, userId))
+    )
     .limit(1);
 
   if (!result) {

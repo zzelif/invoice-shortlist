@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
+import { AvailableStatuses } from "@/db/schema";
 
 type Props = {
   invoiceId: number;
@@ -19,13 +20,13 @@ type Props = {
 };
 
 export default function InvoiceStatusForm({ invoiceId, currentStatus }: Props) {
-  const [status, setStatus] = useOptimistic(currentStatus, (_, s) => s);
+  const [status, setStatus] = useOptimistic<AvailableStatuses>(currentStatus);
 
   async function handleChange(statusId: string) {
     const formData = new FormData();
     formData.append("id", String(invoiceId));
     formData.append("status", statusId);
-    setStatus(statusId);
+    setStatus(statusId as AvailableStatuses);
     try {
       await updateInvoiceStatus(formData);
     } catch (err) {
