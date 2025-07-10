@@ -24,11 +24,13 @@ import {
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 import { updateInvoiceStatus } from "@/app/actions";
 
-export default async function InvoicePage({
-  params,
-}: {
-  params: { invoiceId: string };
-}) {
+type InvoicePageProps = {
+  params: {
+    invoiceId: string;
+  };
+};
+
+export default async function InvoicePage({ params }: InvoicePageProps) {
   const { userId } = await auth();
 
   if (!userId) {
