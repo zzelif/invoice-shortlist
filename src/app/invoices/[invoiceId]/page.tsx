@@ -1,34 +1,57 @@
+import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
+
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
+
+import { cn } from "@/lib/utils";
+import { eq, and } from "drizzle-orm";
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-// import { Badge } from "@/components/ui/badge";
-import InvoiceStatusForm from "@/components/invoice-status";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Container from "@/components/container";
 
-type Props = {
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { AVAILABLE_STATUSES } from "@/data/invoices";
+import { updateInvoiceStatus } from "@/app/actions";
+
+export default async function InvoicePage({
+  params,
+}: {
   params: { invoiceId: string };
-};
+}) {
+  const { userId } = await auth();
 
-export default async function InvoicePage(props: Props) {
-  const invoiceId = parseInt(props.params.invoiceId);
+  if (!userId) {
+    return;
+  }
 
-  if (isNaN(invoiceId)) {
-    throw new Error("Invalid invoice ID");
+  const invoiceId = Number(params.invoiceId);
+
+  if (!Number.isInteger(invoiceId)) {
+    notFound();
   }
 
   const [result] = await db
     .select()
     .from(Invoices)
-    .where(eq(Invoices.id, invoiceId))
+    .where(and(eq(Invoices.id, invoiceId), eq(Invoices.clientId, userId)))
     .limit(1);
 
   if (!result) {
     notFound();
   }
+
+  console.log("result.status", result.status);
 
   const items = JSON.parse(result.items) as {
     name: string;
@@ -37,16 +60,45 @@ export default async function InvoicePage(props: Props) {
   }[];
 
   return (
-    <main>
+    <main className="h-full">
       <Container className="flex flex-col h-full text-center gap-10 ">
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-24 items-center">
           <h1 className="flex items-center gap-4 text-3xl font-semibold">
             Invoice #{result.invoiceNumber}
-            <InvoiceStatusForm
-              invoiceId={result.id}
-              currentStatus={result.status}
-            ></InvoiceStatusForm>
+            <Badge
+              className={cn(
+                "rounded-full capitalize",
+                result.status === "open" && "bg-blue-500",
+                result.status === "paid" && "bg-green-600",
+                result.status === "unpaid" && "bg-zinc-700",
+                result.status === "void" && "bg-red-600"
+              )}
+            >
+              {result.status}
+            </Badge>
           </h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"outline"}>Change Status</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {AVAILABLE_STATUSES.map((status) => {
+                return (
+                  <DropdownMenuItem key={status.id}>
+                    <form action={updateInvoiceStatus}>
+                      <input type="hidden" name="id" value={result.id}></input>
+                      <input
+                        type="hidden"
+                        name="status"
+                        value={status.id}
+                      ></input>
+                      <button>{status.label}</button>
+                    </form>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="grid gap-4 max-w-xl place-self-center text-left">

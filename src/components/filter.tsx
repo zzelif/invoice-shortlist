@@ -1,43 +1,38 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 
 export default function StatusFilter() {
-  const params = useSearchParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const status = params.get("status") || "";
+  const currentStatus = searchParams.get("status") || "";
 
-  const handleSelect = (newStatus: string) => {
-    const url = new URL(window.location.href);
-    if (newStatus) url.searchParams.set("status", newStatus);
-    else url.searchParams.delete("status");
-    router.push(url.toString());
+  const handleSelect = (status: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (status) {
+      params.set("status", status);
+    } else {
+      params.delete("status");
+    }
+
+    router.push(`/dashboard?${params.toString()}`);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "rounded-full capitalize",
-            status === "open" && "bg-blue-500",
-            status === "paid" && "bg-green-600",
-            status === "unpaid" && "bg-zinc-700",
-            status === "void" && "bg-red-600"
-          )}
-        >
-          {status
-            ? AVAILABLE_STATUSES.find((s) => s.id === status)?.label || status
+        <Button variant="outline" className="capitalize">
+          {currentStatus
+            ? AVAILABLE_STATUSES.find((s) => s.id === currentStatus)?.label ??
+              currentStatus
             : "All Statuses"}
         </Button>
       </DropdownMenuTrigger>
@@ -45,9 +40,12 @@ export default function StatusFilter() {
         <DropdownMenuItem onSelect={() => handleSelect("")}>
           All
         </DropdownMenuItem>
-        {AVAILABLE_STATUSES.map((s) => (
-          <DropdownMenuItem key={s.id} onSelect={() => handleSelect(s.id)}>
-            {s.label}
+        {AVAILABLE_STATUSES.map((status) => (
+          <DropdownMenuItem
+            key={status.id}
+            onSelect={() => handleSelect(status.id)}
+          >
+            {status.label}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

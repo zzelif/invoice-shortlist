@@ -2,13 +2,18 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 import { db } from "@/db";
-import { Invoices, InvoiceStatus } from "@/db/schema";
+import { Invoices, AvailableStatuses } from "@/db/schema";
 
 export async function createAction(formData: FormData) {
   const { userId } = await auth();
+
+  if (!userId) {
+    return;
+  }
+
   const invoiceNumber = formData.get("invoiceNumber") as string;
   const issueDate = new Date(formData.get("issueDate") as string);
   const dueDate = new Date(formData.get("dueDate") as string);
@@ -16,10 +21,6 @@ export async function createAction(formData: FormData) {
   const rawItems = formData.get("items") as string;
   const items = JSON.parse(rawItems);
   const total = parseFloat(formData.get("total") as string);
-
-  if (!userId) {
-    return;
-  }
 
   const results = await db
     .insert(Invoices)
@@ -37,16 +38,27 @@ export async function createAction(formData: FormData) {
       id: Invoices.id,
     });
 
+  console.log("Created invoice:", results);
+
   redirect(`/dashboard`);
 }
 
 export async function updateInvoiceStatus(formData: FormData) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return;
+  }
+
   const id = parseInt(formData.get("id") as string);
-  const status = formData.get("status") as InvoiceStatus;
+  const status = formData.get("status") as AvailableStatuses;
 
-  if (!id || !status) throw new Error("Missing required data");
+  const results = await db
+    .update(Invoices)
+    .set({ status })
+    .where(and(eq(Invoices.id, id), eq(Invoices.clientId, userId)));
 
-  await db.update(Invoices).set({ status }).where(eq(Invoices.id, id));
+  console.log("Updated invoice status:", results);
 
   redirect(`/invoices/${id}`);
 }

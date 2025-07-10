@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
 import { Invoices, InvoiceStatus } from "@/db/schema";
 
@@ -20,27 +20,32 @@ import { cn } from "@/lib/utils";
 import Container from "@/components/container";
 import StatusFilter from "@/components/filter";
 
-type Props = {
+export default async function DashboardPage({
+  searchParams,
+}: {
   searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export default async function DashboardPage({ searchParams }: Props) {
+}) {
   const { userId } = await auth();
 
   if (!userId) {
     return;
   }
+  console.log("Search param status =", searchParams?.status);
 
-  console.log("Server searchParams.status", searchParams.status);
   const selectedStatus = searchParams.status?.toString();
-  const filtered = selectedStatus
-    ? await db
-        .select()
-        .from(Invoices)
-        .where(eq(Invoices.status, selectedStatus as InvoiceStatus))
-    : await db.select().from(Invoices).where(eq(Invoices.clientId, userId));
-  console.log("Selected Status:", selectedStatus);
-  console.log("Filtered Invoices:", filtered);
+
+  const filtered = await db
+    .select()
+    .from(Invoices)
+    .where(
+      selectedStatus
+        ? and(
+            eq(Invoices.status, selectedStatus as InvoiceStatus),
+            eq(Invoices.clientId, userId)
+          )
+        : eq(Invoices.clientId, userId)
+    );
+
   return (
     <main className="h-full">
       <Container>

@@ -7,12 +7,18 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
-export const statusEnum = pgEnum("invoice_status", [
-  "open",
-  "paid",
-  "unpaid",
-  "void",
-]);
+import { AVAILABLE_STATUSES } from "@/data/invoices";
+
+export type AvailableStatuses = (typeof AVAILABLE_STATUSES)[number]["id"];
+
+const statuses = AVAILABLE_STATUSES.map(
+  ({ id }) => id
+) as Array<AvailableStatuses>;
+
+export const statusEnum = pgEnum(
+  "invoice_status",
+  statuses as [AvailableStatuses, ...Array<AvailableStatuses>]
+);
 
 export type InvoiceStatus = (typeof statusEnum.enumValues)[number];
 
