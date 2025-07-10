@@ -37,7 +37,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
     return;
   }
 
-  const invoiceId = Number(params.invoiceId);
+  const invoiceId = parseInt(params.invoiceId);
 
   if (!invoiceId) {
     notFound();
@@ -46,9 +46,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   const [result] = await db
     .select()
     .from(Invoices)
-    .where(
-      and(eq(Invoices.id, Number(invoiceId)), eq(Invoices.clientId, userId))
-    )
+    .where(and(eq(Invoices.id, invoiceId), eq(Invoices.clientId, userId)))
     .limit(1);
 
   if (!result) {
