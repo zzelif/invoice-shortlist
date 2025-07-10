@@ -27,7 +27,7 @@ import { updateInvoiceStatus } from "@/app/actions";
 export default async function InvoicePage({
   params,
 }: {
-  params: { invoiceId?: string };
+  params: { invoiceId: string };
 }) {
   const { userId } = await auth();
 
