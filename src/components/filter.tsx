@@ -1,11 +1,11 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
@@ -13,39 +13,35 @@ import { AVAILABLE_STATUSES } from "@/data/invoices";
 export default function StatusFilter() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const currentStatus = searchParams.get("status") || "";
+  const pathname = usePathname();
+  const current = searchParams.get("status") || "";
 
-  const handleSelect = (status: string) => {
+  const select = (status: string) => {
+    // clone and set / delete
     const params = new URLSearchParams(searchParams.toString());
-    if (status) {
-      params.set("status", status);
-    } else {
-      params.delete("status");
-    }
+    if (status) params.set("status", status);
+    else params.delete("status");
 
-    router.push(`/dashboard?${params.toString()}`);
+    console.log("searchParams = ", pathname, params.toString());
+
+    // navigate to same path + new query
+    router.push(pathname + "?" + params.toString());
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="capitalize">
-          {currentStatus
-            ? AVAILABLE_STATUSES.find((s) => s.id === currentStatus)?.label ??
-              currentStatus
+          {current
+            ? AVAILABLE_STATUSES.find((s) => s.id === current)?.label
             : "All Statuses"}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onSelect={() => handleSelect("")}>
-          All
-        </DropdownMenuItem>
-        {AVAILABLE_STATUSES.map((status) => (
-          <DropdownMenuItem
-            key={status.id}
-            onSelect={() => handleSelect(status.id)}
-          >
-            {status.label}
+        <DropdownMenuItem onSelect={() => select("")}>All</DropdownMenuItem>
+        {AVAILABLE_STATUSES.map((s) => (
+          <DropdownMenuItem key={s.id} onSelect={() => select(s.id)}>
+            {s.label}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
