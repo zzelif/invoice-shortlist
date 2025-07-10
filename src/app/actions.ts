@@ -1,12 +1,14 @@
 "use server";
 
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
+
 import { db } from "@/db";
 import { Invoices, InvoiceStatus } from "@/db/schema";
-import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
-//
 
 export async function createAction(formData: FormData) {
+  const { userId } = await auth();
   const invoiceNumber = formData.get("invoiceNumber") as string;
   const issueDate = new Date(formData.get("issueDate") as string);
   const dueDate = new Date(formData.get("dueDate") as string);
@@ -15,6 +17,10 @@ export async function createAction(formData: FormData) {
   const items = JSON.parse(rawItems);
   const total = parseFloat(formData.get("total") as string);
 
+  if (!userId) {
+    return;
+  }
+
   const results = await db
     .insert(Invoices)
     .values({
@@ -22,17 +28,16 @@ export async function createAction(formData: FormData) {
       issueDate,
       dueDate,
       client,
+      clientId: userId,
       items: JSON.stringify(items),
-      total,
+      total: total.toFixed(2),
       status: "open",
     })
     .returning({
       id: Invoices.id,
     });
 
-  console.log("Created Invoice:", results);
-
-  redirect(`/dashboard`); // Redirect to the newly created invoice
+  redirect(`/dashboard`);
 }
 
 export async function updateInvoiceStatus(formData: FormData) {

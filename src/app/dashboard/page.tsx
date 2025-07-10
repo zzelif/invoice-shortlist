@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { Invoices, InvoiceStatus } from "@/db/schema";
@@ -24,6 +25,12 @@ type Props = {
 };
 
 export default async function DashboardPage({ searchParams }: Props) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return;
+  }
+
   console.log("Server searchParams.status", searchParams.status);
   const selectedStatus = searchParams.status?.toString();
   const filtered = selectedStatus
@@ -31,7 +38,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         .select()
         .from(Invoices)
         .where(eq(Invoices.status, selectedStatus as InvoiceStatus))
-    : await db.select().from(Invoices);
+    : await db.select().from(Invoices).where(eq(Invoices.clientId, userId));
   console.log("Selected Status:", selectedStatus);
   console.log("Filtered Invoices:", filtered);
   return (
@@ -53,7 +60,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
 
         <Table>
-          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableCaption>A list of recent invoices.</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px] p-4">Invoice #</TableHead>

@@ -22,6 +22,7 @@ export const Invoices = pgTable("invoices", {
   issueDate: timestamp("issue_date").notNull(),
   dueDate: timestamp("due_date").notNull(),
   client: text("client").notNull(),
+  clientId: text("clientId").notNull(),
   items: text("items").notNull(),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
   status: statusEnum("status").default("open").notNull(),

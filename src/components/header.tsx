@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <header className="mt-8 mb-12">
+    <header className="mt-5 mb-8">
       <Container>
         <div className="flex justify-between items-center gap-4">
           <p className="font-bold text-black">

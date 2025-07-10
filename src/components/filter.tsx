@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,16 @@ export default function StatusFilter() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="capitalize">
+        <Button
+          variant="outline"
+          className={cn(
+            "rounded-full capitalize",
+            status === "open" && "bg-blue-500",
+            status === "paid" && "bg-green-600",
+            status === "unpaid" && "bg-zinc-700",
+            status === "void" && "bg-red-600"
+          )}
+        >
           {status
             ? AVAILABLE_STATUSES.find((s) => s.id === status)?.label || status
             : "All Statuses"}
